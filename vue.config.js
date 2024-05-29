@@ -5,19 +5,18 @@ module.exports = {
     devServer: {
         disableHostCheck: true,
         proxy: {
-            '/api/webrtc': {
-                target: 'http://localhost:3000',
-                changeOrigin: true
-            },
             '/': {
                 target: 'https://nasv4.huhaorui.com/',
                 changeOrigin: true
             },
-            '/socket.io': {
-                target: 'ws://localhost:3000',
-                ws: true,
+            '/send': {
+                target: 'http://127.0.0.1:7799/',
                 changeOrigin: true
             },
+            '/receive': {
+                target: 'http://127.0.0.1:7799/',
+                changeOrigin: true
+            }
         }
     }
 }
