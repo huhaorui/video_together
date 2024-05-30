@@ -6,17 +6,6 @@
         <a-menu-item key="1">
           <span>Option 1</span>
         </a-menu-item>
-        <a-sub-menu key="sub1">
-          <template #title>
-            <span>
-              <user-outlined />
-              <span>User</span>
-            </span>
-          </template>
-          <a-menu-item key="3">Tom</a-menu-item>
-          <a-menu-item key="4">Bill</a-menu-item>
-          <a-menu-item key="5">Alex</a-menu-item>
-        </a-sub-menu>
       </a-menu>
     </a-layout-sider>
 
@@ -25,7 +14,7 @@
       <a-layout-content style="margin: 0 16px">
 
         <div :style="{ padding: '24px', background: '#fff', minHeight: '360px' }">
-          Bill is a cat.
+          <room/>
         </div>
 
       </a-layout-content>
@@ -40,6 +29,7 @@
 
 <script setup>
 import { ref } from "vue";
+import room from "./views/room.vue";
 const collapsed = ref(false);
 const selectedKeys = ref(["1"]);
 </script>
@@ -58,3 +48,19 @@ const selectedKeys = ref(["1"]);
   background: #141414;
 }
 </style>
+
+
+<script>
+export default {
+  props: {
+    source: String
+  },
+  data: () => ({
+    activeItem: 'room'
+  }),
+  watch: {},
+  created() {
+    this.activeItem = "room"
+  }
+}
+</script>
