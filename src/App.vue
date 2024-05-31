@@ -1,13 +1,6 @@
 <template>
   <a-layout style="min-height: 100vh">
-    <a-layout-sider v-model:collapsed="collapsed" collapsible>
-      <div class="logo" />
-      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline">
-        <a-menu-item key="1">
-          <span>Option 1</span>
-        </a-menu-item>
-      </a-menu>
-    </a-layout-sider>
+    <LeftSides></LeftSides>
 
     <a-layout>
       <a-layout-header style="background: #fff; padding: 0" />
@@ -30,11 +23,16 @@
 <script setup>
 import { ref } from "vue";
 import room from "./views/room.vue";
+import LeftSides from "@/components/LeftSides.vue";
 const collapsed = ref(false);
 const selectedKeys = ref(["1"]);
 </script>
 
-<style scoped>
+<style>
+:global(.edit-sider) {
+  flex: 0 0 auto;
+}
+
 #components-layout-demo-side .logo {
   height: 32px;
   margin: 16px;

@@ -1,11 +1,5 @@
 <script setup>
 import { reactive } from 'vue';
-const handleFinish = values => {
-  console.log(values, formState);
-};
-const handleFinishFailed = errors => {
-  console.log(errors);
-};
 </script>
 
 <template>
@@ -31,12 +25,6 @@ const handleFinishFailed = errors => {
       </a-form-item>
     </a-form>
 
-<!--    <v-btn-->
-<!--        color="primary"-->
-<!--        @click="enter"-->
-<!--    >-->
-<!--      确认-->
-<!--    </v-btn>-->
     <div id="choose" width="360" height="640"/>
   </div>
 </template>
@@ -71,6 +59,7 @@ export default {
         this.$axios.get(formState.root_link).then(res => {
           this.play_list = new Map()
           let html = res.data
+          console.log(html)
           const regex = /<a href="([^"]+)">([^<]+)<\/a>/g;
           let matches;
           let index = 1;
