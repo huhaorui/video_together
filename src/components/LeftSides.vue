@@ -1,20 +1,27 @@
 <script setup>
-import {reactive, ref} from "vue";
+import {reactive, ref, defineEmits} from "vue";
 import {DoubleLeftOutlined, DoubleRightOutlined} from '@ant-design/icons-vue';
 import axios from "axios";
 
 const formState = reactive({
   root_link: '',
 });
-const file_list = ref([]);
+let file_list = ref([]);
 
-const choose_menu = (file_name, url) => {
+
+const emit = defineEmits(['choose_menu'])
+const choose_menu = (file_name, url, type) => {
   console.log(file_name)
   console.log(url)
+  if (type === 'file') {
+    emit('choose_menu', url.slice(0, -1))
+    return
+  }
+  formState.root_link = url
   if (url.endsWith('/')) {
     axios.get(url).then(res => {
-      console.log(res.data);
-      file_list.value = res.data;
+      file_list.value = [{'name': '../', 'type': 'directory'}];
+      file_list.value.push(...res.data);
     }).catch(err => {
       console.error(err);
       // 处理错误
@@ -45,9 +52,9 @@ const choose_menu = (file_name, url) => {
     <div>
       <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline"
               style="text-align: center;position: relative;left: -4px;">
-        <a-menu-item v-for="(item, index) in file_list" :key="index" @click="choose_menu(item.fileName, item.url)"
+        <a-menu-item v-for="(item, index) in file_list" :key="index" @click="choose_menu(item.name, formState.root_link + item.name + '/', item.type)"
                      style="color: #f2f2f2">
-          {{ item.fileName }}
+          {{ item.name }}
         </a-menu-item>
       </a-menu>
 
@@ -63,32 +70,6 @@ const choose_menu = (file_name, url) => {
 <style scoped>
 
 </style>
-
-<!--<script>-->
-<!--import { ref } from 'vue';-->
-<!--export default {-->
-<!--  data: () => ({-->
-<!--    file_list: []-->
-<!--  }),-->
-<!--  methods: {-->
-<!--    // choose_menu(file_name, url) {-->
-<!--    //   if (url.endsWith('/')) {-->
-<!--    //     // this.$axios.get(url).then(res => {-->
-<!--    //     //   console.log(res.data)-->
-<!--    //     //   this.file_list = res.data-->
-<!--    //     // })-->
-<!--    //     this.$axios.get(url).then(res => {-->
-<!--    //       this.$nextTick(() => {-->
-<!--    //         this.file_list = res.data;-->
-<!--    //       });-->
-<!--    //     }).catch(error => {-->
-<!--    //       console.error('Error fetching data:', error);-->
-<!--    //     });-->
-<!--    //   }-->
-<!--    // }-->
-<!--  }-->
-<!--}-->
-<!--</script>-->
 
 <script>
 export default {

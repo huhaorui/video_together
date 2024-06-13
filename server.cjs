@@ -17,5 +17,5 @@ app.post("/receive", (req, res) => {
     res.json(map.get(req.body.movie))
 });
 
-http.createServer(app).listen(7799);
+http.createServer(app).listen(7799,"::0");
 

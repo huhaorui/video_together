@@ -1,13 +1,13 @@
 <template>
   <a-layout style="min-height: 100vh">
-    <LeftSides></LeftSides>
+    <LeftSides @choose_menu="return_url"></LeftSides>
 
     <a-layout>
       <a-layout-header style="background: #fff; padding: 0" />
       <a-layout-content style="margin: 0 16px">
 
         <div :style="{ padding: '24px', background: '#fff', minHeight: '360px' }">
-          <room/>
+          <room :video_url="video_url"/>
         </div>
 
       </a-layout-content>
@@ -26,6 +26,12 @@ import room from "./views/room.vue";
 import LeftSides from "@/components/LeftSides.vue";
 const collapsed = ref(false);
 const selectedKeys = ref(["1"]);
+const video_url = ref("")
+
+const return_url = (url) => {
+  console.log(url)
+  video_url.value = url.content
+}
 </script>
 
 <style>
