@@ -1,12 +1,28 @@
 <script setup>
-import {reactive} from "vue";
+import {reactive, ref} from "vue";
 import {DoubleLeftOutlined, DoubleRightOutlined} from '@ant-design/icons-vue';
+import axios from "axios";
 
 const formState = reactive({
   root_link: '',
 });
+const file_list = ref([]);
 
-let file_list = [];
+const choose_menu = (file_name, url) => {
+  console.log(file_name)
+  console.log(url)
+  if (url.endsWith('/')) {
+    axios.get(url).then(res => {
+      console.log(res.data);
+      file_list.value = res.data;
+    }).catch(err => {
+      console.error(err);
+      // 处理错误
+    });
+  }
+};
+
+
 </script>
 
 <template>
@@ -27,9 +43,11 @@ let file_list = [];
     </a-form>
 
     <div>
-      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline" style="text-align: center;position: relative;left: -4px;">
-        <a-menu-item v-for="(item, index) in file_list" :key="index" @click="choose_menu(item.fileName, item.url)" style="color: #f2f2f2">
-          {{item.fileName}}
+      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline"
+              style="text-align: center;position: relative;left: -4px;">
+        <a-menu-item v-for="(item, index) in file_list" :key="index" @click="choose_menu(item.fileName, item.url)"
+                     style="color: #f2f2f2">
+          {{ item.fileName }}
         </a-menu-item>
       </a-menu>
 
@@ -73,27 +91,9 @@ let file_list = [];
 <!--</script>-->
 
 <script>
-import { ref } from 'vue';
 export default {
   setup() {
-    const file_list = ref([]);
 
-    const choose_menu = (file_name, url) => {
-      if (url.endsWith('/')) {
-        this.axios.get(url).then(res => {
-          console.log(res.data);
-          file_list.value = res.data;
-        }).catch(err => {
-          console.error(err);
-          // 处理错误
-        });
-      }
-    };
-
-    return {
-      file_list,
-      choose_menu
-    };
   }
 };
 </script>
