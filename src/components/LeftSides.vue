@@ -20,8 +20,18 @@ const choose_menu = (file_name, url, type) => {
   formState.root_link = url
   if (url.endsWith('/')) {
     axios.get(url).then(res => {
-      file_list.value = [{'name': '../', 'type': 'directory'}];
-      file_list.value.push(...res.data);
+      let temp_file_list = res.data;
+      axios.get(url + 'rule.js').then(js => {
+        eval(js.data)
+        temp_file_list.forEach(item => item.show_name = document.crop_name(item.name))
+        temp_file_list = temp_file_list.filter(item => item.name !== 'rule.js')
+        file_list.value = [{'name': '../', 'type': 'directory', 'show_name': '../'}, ...temp_file_list]
+        console.log(file_list.value)
+      }).catch(err => {
+        console.log(err)
+        temp_file_list.forEach(item => item.show_name = item.name)
+        file_list.value = [{'name': '../', 'type': 'directory', 'show_name': '../'}, ...temp_file_list]
+      })
     }).catch(err => {
       console.error(err);
       // 处理错误
@@ -52,9 +62,10 @@ const choose_menu = (file_name, url, type) => {
     <div>
       <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline"
               style="text-align: center;position: relative;left: -4px;">
-        <a-menu-item v-for="(item, index) in file_list" :key="index" @click="choose_menu(item.name, formState.root_link + item.name + '/', item.type)"
+        <a-menu-item v-for="(item, index) in file_list" :key="index"
+                     @click="choose_menu(item.name, formState.root_link + item.name + '/', item.type)"
                      style="color: #f2f2f2">
-          {{ item.name }}
+          {{ item.show_name }}
         </a-menu-item>
       </a-menu>
 
