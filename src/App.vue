@@ -30,7 +30,7 @@ const video_url = ref("")
 
 const return_url = (url) => {
   console.log(url)
-  video_url.value = url.content
+  video_url.value = url
 }
 </script>
 
