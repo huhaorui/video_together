@@ -1,6 +1,6 @@
 <template>
   <a-layout style="min-height: 100vh">
-    <LeftSides @choose_menu="return_url"></LeftSides>
+    <LeftSides @choose_menu="return_url"/>
 
     <a-layout>
       <a-layout-header style="background: #fff; padding: 0" />

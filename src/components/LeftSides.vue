@@ -10,8 +10,9 @@ let file_list = ref([]);
 
 
 const emit = defineEmits(['choose_menu'])
-const choose_menu = (index, file_name, url, type) => {
+const choose_menu = (index, show_name, url, type) => {
   if (type === 'file') {
+    document.title = show_name
     const choose_menu_result = {
       "video_url": url.slice(0, -1),
       "play_list": file_list,
@@ -30,8 +31,7 @@ const choose_menu = (index, file_name, url, type) => {
         temp_file_list = temp_file_list.filter(item => item.name !== 'rule.js')
         file_list.value = [{'name': '../', 'type': 'directory', 'show_name': '../'}, ...temp_file_list]
         console.log(file_list.value)
-      }).catch(err => {
-        console.log(err)
+      }).catch(() => {
         temp_file_list.forEach(item => item.show_name = item.name)
         file_list.value = [{'name': '../', 'type': 'directory', 'show_name': '../'}, ...temp_file_list]
       })
@@ -66,7 +66,7 @@ const choose_menu = (index, file_name, url, type) => {
       <a-menu theme="dark" mode="inline"
               style="text-align: center;position: relative;left: -4px;">
         <a-menu-item v-for="(item, index) in file_list" :key="index"
-                     @click="choose_menu(index, item.name, formState.root_link + item.name + '/', item.type)"
+                     @click="choose_menu(index, item.show_name, formState.root_link + item.name + '/', item.type)"
                      style="color: #f2f2f2">
           {{ item.show_name }}
         </a-menu-item>
