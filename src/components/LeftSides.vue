@@ -10,11 +10,14 @@ let file_list = ref([]);
 
 
 const emit = defineEmits(['choose_menu'])
-const choose_menu = (file_name, url, type) => {
-  console.log(file_name)
-  console.log(url)
+const choose_menu = (index, file_name, url, type) => {
   if (type === 'file') {
-    emit('choose_menu', url.slice(0, -1))
+    const choose_menu_result = {
+      "video_url": url.slice(0, -1),
+      "play_list": file_list,
+      "video_index": index
+    }
+    emit('choose_menu', choose_menu_result)
     return
   }
   formState.root_link = url
@@ -51,7 +54,7 @@ const choose_menu = (file_name, url, type) => {
             type="primary"
             html-type="submit"
             :disabled="formState.root_link === ''"
-            @click="choose_menu('root', formState.root_link)"
+            @click="choose_menu(0, 'root', formState.root_link, '')"
             style="color: #f2f2f2"
         >
           确认
@@ -60,10 +63,10 @@ const choose_menu = (file_name, url, type) => {
     </a-form>
 
     <div>
-      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline"
+      <a-menu theme="dark" mode="inline"
               style="text-align: center;position: relative;left: -4px;">
         <a-menu-item v-for="(item, index) in file_list" :key="index"
-                     @click="choose_menu(item.name, formState.root_link + item.name + '/', item.type)"
+                     @click="choose_menu(index, item.name, formState.root_link + item.name + '/', item.type)"
                      style="color: #f2f2f2">
           {{ item.show_name }}
         </a-menu-item>

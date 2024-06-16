@@ -1,19 +1,33 @@
 <script setup>
-import {reactive, toRefs, defineProps} from 'vue';
+import {reactive, toRefs, defineProps, watch, ref, toRaw} from 'vue';
 import axios from "axios";
 
 const props = defineProps({
   //子组件接收父组件传递过来的值
-  video_url: String,
+  choose_video_obj: {
+    type: Object,
+  },
 })
-//使用父组件传递过来的值
-const {video_url} = toRefs(props)
+
+const {choose_video_obj} = toRefs(props)
+const index = ref(0)
+const video_url = ref("")
+const play_list = ref([])
+
+
+watch(choose_video_obj, (newValue, oldValue) => {
+  newValue = toRaw(newValue);
+  console.log(newValue)
+  index.value = newValue.video_index;
+  video_url.value = newValue.video_url;
+  play_list.value = newValue.play_list;
+});
 
 </script>
 
 <template>
   <div style="padding-left: 20px;padding-right: 20px;">
-    <video :src="video_url"
+    <video :src="choose_video_obj.video_url"
         id="movie" width="640" height="360" autoplay controls style="padding-bottom: 30px"/>
   </div>
 </template>
@@ -39,8 +53,6 @@ export default {
     pauseing_update: false,
     id: 0,
     formState: {},
-    play_list: {},
-    index: 0
   }),
   methods: {
     enterUrl(url, index) {
@@ -54,8 +66,7 @@ export default {
     }
   },
   mounted() {
-    window.enterUrl = (url, index) => this.enterUrl(url, index)
-    this.url = this.$route.query.url
+    this.video_url.value = this.$route.query.url
     this.id = this.$route.query.id
     formState.root_link = this.$route.query.dir
     if (this.id === undefined) {
@@ -63,8 +74,10 @@ export default {
     }
     console.log('url', this.url)
     console.log('formState.root_link', formState.root_link)
+
     this.video = document.getElementById("movie")
     this.video.src = this.url
+
     this.video.onseeked = () => {
       this.pauseing_update = true
       setTimeout(() => {
@@ -76,9 +89,10 @@ export default {
         seek_time: new Date().getTime()
       })
     }
+
     this.video.onended = () => {
       this.index++
-      console.log(this.play_list)
+      console.log(this.play_list.value)
       this.video.src = this.play_list.get(this.index).url
       document.title = decodeURI(this.video.src.substring(this.video.src.lastIndexOf('/') + 1))
       this.pauseing_update = true
@@ -86,6 +100,7 @@ export default {
         this.pauseing_update = false
       }, 3000)
     }
+
     this.video.onplay = () => {
       this.pauseing_update = true
       setTimeout(() => {
@@ -97,6 +112,7 @@ export default {
         seek_time: new Date().getTime()
       })
     }
+
     setInterval(() => {
       if (!this.pauseing_update) {
         this.$axios.post("/receive", {movie: this.id === undefined ? this.video.src : this.id}).then(res => {
@@ -114,6 +130,7 @@ export default {
         })
       }
     }, 1000)
+
     if (formState.root_link !== "") {
       this.enter()
     }

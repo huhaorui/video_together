@@ -7,7 +7,7 @@
       <a-layout-content style="margin: 0 16px">
 
         <div :style="{ padding: '24px', background: '#fff', minHeight: '360px' }">
-          <room :video_url="video_url"/>
+          <room :choose_video_obj="choose_video_obj"/>
         </div>
 
       </a-layout-content>
@@ -21,16 +21,13 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import {reactive, ref} from "vue";
 import room from "./views/room.vue";
 import LeftSides from "@/components/LeftSides.vue";
-const collapsed = ref(false);
-const selectedKeys = ref(["1"]);
-const video_url = ref("")
+let choose_video_obj = ref({})
 
-const return_url = (url) => {
-  console.log(url)
-  video_url.value = url
+const return_url = (obj) => {
+  choose_video_obj.value = obj
 }
 </script>
 
