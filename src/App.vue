@@ -1,25 +1,58 @@
 <template>
+  <a-layout style="min-height: 100vh">
+    <LeftSides @choose_menu="return_url"/>
 
-  <v-app id="inspire">
-    <!-- 顶边栏 -->
-    <v-app-bar app color=#4CAF50 dark>
-      <v-app-bar-nav-icon/>
-      <v-toolbar-title>Video together</v-toolbar-title>
-    </v-app-bar>
+    <a-layout>
+      <a-layout-header style="background: #fff; padding: 0" />
+      <a-layout-content style="margin: 0 16px">
 
-    <!--  中间content  -->
-    <v-content>
-      <component :is="activeItem"></component>
-    </v-content>
-  </v-app>
+        <div :style="{ padding: '24px', background: '#fff', minHeight: '360px' }">
+          <room :choose_video_obj="choose_video_obj"/>
+        </div>
+
+      </a-layout-content>
+
+
+      <a-layout-footer style="text-align: center">
+        Ant Design ©2018 Created by Ant UED
+      </a-layout-footer>
+    </a-layout>
+  </a-layout>
 </template>
 
-<script>
+<script setup>
+import {reactive, ref} from "vue";
+import room from "./views/room.vue";
+import LeftSides from "@/components/LeftSides.vue";
+let choose_video_obj = ref({})
 
+const return_url = (obj) => {
+  choose_video_obj.value = obj
+}
+</script>
+
+<style>
+:global(.edit-sider) {
+  flex: 0 0 auto;
+}
+
+#components-layout-demo-side .logo {
+  height: 32px;
+  margin: 16px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.site-layout .site-layout-background {
+  background: #fff;
+}
+[data-theme="dark"] .site-layout .site-layout-background {
+  background: #141414;
+}
+</style>
+
+
+<script>
 export default {
-  components: {
-    room: () => import('./views/room'),
-  },
   props: {
     source: String
   },

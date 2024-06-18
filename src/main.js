@@ -1,25 +1,12 @@
-import Vue from 'vue'
+import './assets/main.css'
+
+import {createApp} from 'vue'
 import App from './App.vue'
 import router from './router'
-import store from './store'
-import vuetify from './plugins/vuetify'
-import Antd from 'ant-design-vue'
-import 'ant-design-vue/dist/antd.css';
-
-
+import Antd from 'ant-design-vue';
 import axios from 'axios'
 
-
-Vue.config.productionTip = false
-Vue.prototype.$http = axios
-Vue.use(Antd)
-let vue = new Vue({
-    router,
-    store,
-    render: h => h(App),
-    vuetify,
-    axios
-})
-vue.$mount('#app')
-document.vue = vue
-export default axios
+const app = createApp(App)
+app.use(router);
+app.config.globalProperties.$axios = axios
+app.use(Antd).mount('#app');
