@@ -50,7 +50,7 @@ const onVideoSeeked = () => {
     pauseing_update.value = false;
   }, 2000);
   axios.post('/send', {
-    movie: video_url.value,
+    movie: id.value === '' ? video.value.src : id.value,
     video_time: video.value.currentTime,
     seek_time: new Date().getTime(),
   });
