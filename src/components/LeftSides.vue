@@ -11,6 +11,24 @@ let file_list = ref([]);
 
 const emit = defineEmits(['choose_menu'])
 const choose_menu = (index, show_name, url, type) => {
+  // 对url进行整形
+  let protocol = url.split('://')[0]
+  let items = url.split('://')[1].split('/')
+  let final_url = ""
+  for (let i = items.length - 1; i >= 0; i--) {
+    if (items[i] === '..') {  // 处理 ../
+      i--;
+      continue;
+    }
+    if (items[i] === '') {  // 处理//
+      continue;
+    }
+    final_url = items[i] + '/' + final_url
+  }
+  final_url = protocol + "://" + final_url
+  url = final_url
+
+
   if (type === 'file') {
     document.title = show_name
     const choose_menu_result = {
@@ -30,7 +48,7 @@ const choose_menu = (index, show_name, url, type) => {
         temp_file_list.forEach(item => item.show_name = document.crop_name(item.name))
         temp_file_list = temp_file_list.filter(item => item.name !== 'rule.js')
         file_list.value = [{'name': '../', 'type': 'directory', 'show_name': '../'}, ...temp_file_list]
-        console.log(file_list.value)
+        // console.log(file_list.value)
       }).catch(() => {
         temp_file_list.forEach(item => item.show_name = item.name)
         file_list.value = [{'name': '../', 'type': 'directory', 'show_name': '../'}, ...temp_file_list]
