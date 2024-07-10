@@ -1,46 +1,92 @@
 <script setup>
-import {reactive, ref, defineEmits} from "vue";
+import {reactive, ref, defineEmits, onMounted, watch} from "vue";
 import {DoubleLeftOutlined, DoubleRightOutlined} from '@ant-design/icons-vue';
 import axios from "axios";
+import {useRoute} from "vue-router";
 
 const formState = reactive({
   root_link: '',
 });
 let file_list = ref([]);
 
+const rename_file_by_rule = (directory_url) => {
+  return axios.get(directory_url + 'rule.js')
+      .then(response => {
+        console.log(directory_url + 'rule.js存在');
+        eval(response.data); // 直接执行 rule.js 文件内容
+      })
+      .catch(error => {
+        console.log(directory_url + 'rule.js不存在或加载失败');
+        document.crop_name = (name) => name; // 默认的函数
+      });
+};
+
+const get_directory_detail = (url) => {
+  if (url.endsWith('/')) {
+    axios.get(url).then(res => {
+      let return_file_list = res.data;
+
+      document.crop_name = (url) => rename_file_by_rule(url)
+      document.crop_name(url)
+          .then(() => {
+            return_file_list.forEach(item => {
+              item.show_name = document.crop_name(item.name);
+            });
+            return_file_list = return_file_list.filter(item => item.name !== 'rule.js')
+            file_list.value = [{'name': '../', 'type': 'directory', 'show_name': '../'}, ...return_file_list]
+          });
+
+    }).catch(err => {
+      console.error(err);
+      // 处理错误
+    });
+  }
+}
 
 const emit = defineEmits(['choose_menu'])
 const choose_menu = (index, show_name, url, type) => {
+  // todo 对url进行整形
+
+  // 文件情况
   if (type === 'file') {
     document.title = show_name
-    const choose_menu_result = {
-      "video_url": url.slice(0, -1),
+    if (url.endsWith('/')) url = url.slice(0, -1)  // 历史遗留问题，确保文件结尾没有/
+    let directory_url = url.slice(0, url.lastIndexOf("/") + 1)  // 目录的结尾必须是/
+    if (file_list.value.length === 0) {  // 从地址栏进入时播放列表未知，补充获取播放列表
+      get_directory_detail(directory_url)
+    }
+
+    const choose_menu_result = {   // 传递参数给父组件，用于处理自动播放
+      "video_url": url,
       "play_list": file_list,
       "video_index": index
     }
     emit('choose_menu', choose_menu_result)
     return
   }
+
+  // 目录情况
   formState.root_link = url
-  if (url.endsWith('/')) {
-    axios.get(url).then(res => {
-      let temp_file_list = res.data;
-      axios.get(url + 'rule.js').then(js => {
-        eval(js.data)
-        temp_file_list.forEach(item => item.show_name = document.crop_name(item.name))
-        temp_file_list = temp_file_list.filter(item => item.name !== 'rule.js')
-        file_list.value = [{'name': '../', 'type': 'directory', 'show_name': '../'}, ...temp_file_list]
-        console.log(file_list.value)
-      }).catch(() => {
-        temp_file_list.forEach(item => item.show_name = item.name)
-        file_list.value = [{'name': '../', 'type': 'directory', 'show_name': '../'}, ...temp_file_list]
-      })
-    }).catch(err => {
-      console.error(err);
-      // 处理错误
-    });
-  }
+  get_directory_detail(url)
 };
+
+
+let source_url = ref('')
+let file_name = ref('')
+let index = ref(0)
+onMounted(() => {
+  const route = useRoute();
+  watch(() => route.query, (query) => {
+    source_url.value = query.source_url;
+    index.value = parseInt(query.index, 10);
+    if (query.file_name) {
+      file_name.value = query.file_name;
+      choose_menu(index.value, query.file_name, query.source_url + query.file_name, 'file')
+    } else  {
+      choose_menu(index.value, query.source_url, query.source_url, 'directory')
+    }
+  })
+})
 
 
 </script>
