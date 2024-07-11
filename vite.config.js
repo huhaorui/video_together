@@ -16,11 +16,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/send': {
-        target: 'http://127.0.0.1:7799/',
+        target: 'https://together.huhaorui.com/',
         changeOrigin: true
       },
       '/receive': {
-        target: 'http://127.0.0.1:7799/',
+        target: 'https://together.huhaorui.com/',
         changeOrigin: true
       },
       '/nas': {
