@@ -1,7 +1,7 @@
 <template>
-  <div style="padding-left: 20px; padding-right: 20px;">
-    <video ref="video" :src="video_url" id="movie" width="100%" height="100%" autoplay controls
-           style="padding-bottom: 30px"></video>
+  <div style="max-width: 100%;height: auto;display: block">
+    <video ref="video" :src="video_url" id="movie" autoplay controls
+           style="margin: auto;max-width: 90%;display: block"></video>
   </div>
 </template>
 
@@ -46,25 +46,23 @@ const onVideoEnded = () => {
 
 const onVideoSeeked = () => {
   pauseing_update.value = true;
-  setTimeout(() => {
-    pauseing_update.value = false;
-  }, 2000);
   axios.post('/send', {
     movie: id.value === '' ? video.value.src : id.value,
     video_time: video.value.currentTime,
     seek_time: new Date().getTime(),
+  }).then(() => {
+    pauseing_update.value = false;
   });
 };
 
 const onVideoPlay = () => {
   pauseing_update.value = true;
-  setTimeout(() => {
-    pauseing_update.value = false;
-  }, 2000);
   axios.post('/send', {
-    movie: video_url.value,
+    movie: id.value === '' ? video.value.src : id.value,
     video_time: video.value.currentTime,
     seek_time: new Date().getTime(),
+  }).then(() => {
+    pauseing_update.value = false;
   });
 };
 
