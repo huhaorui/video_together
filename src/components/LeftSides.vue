@@ -1,5 +1,5 @@
 <script setup>
-import {reactive, ref, defineEmits, onMounted, watch} from "vue";
+import {reactive, ref, defineEmits, onMounted, watch, toRefs, toRaw} from "vue";
 import axios from "axios";
 import {useRoute} from "vue-router";
 
@@ -7,46 +7,61 @@ const formState = reactive({
   root_link: '',
 });
 
+const props = defineProps({
+  curr_index: {
+    type: Number,
+  },
+})
+const {curr_index} = toRefs(props)
+
 let file_list = ref([{}]);
 let source_url = ref('')
 let file_name = ref('')
 let index = ref(0)
-let selectedKeys = ref([1])
+let selectedKeys = ref([])
 let collapsed = ref(false)
 let loading_file_flag = ref(true)
 
-const rename_file_by_rule = (directory_url) => {
+watch(curr_index, (newValue) => {
+  newValue = toRaw(newValue);
+  selectedKeys.value = [newValue.value];
+});
+
+const get_rename_rule = (directory_url) => {
   return axios.get(directory_url + 'rule.js')
-      .then(response => {
-        console.log(directory_url + 'rule.js存在');
-        eval(response.data); // 直接执行 rule.js 文件内容
-      })
-      .catch(() => {
-        console.log(directory_url + 'rule.js不存在或加载失败');
-        document.crop_name = (name) => name; // 默认的函数
-      });
+    .then(response => {
+      console.log(directory_url + 'rule.js存在');
+      return Function('input', '"use strict"; return ' + response.data)
+    })
+    .catch(() => {
+      console.log(directory_url + 'rule.js不存在或加载失败');
+      return (input) => (input)
+    });
 };
 
 const get_directory_detail = (url) => {
   file_list.value = []
   loading_file_flag.value = true
+  url = url.substring(0, url.lastIndexOf('/') + 1)
   if (url.endsWith('/')) {
-    axios.get(url).then(res => {
+    axios.get(url).then(async res => {
       let return_file_list = res.data;
-      document.crop_name = (url) => rename_file_by_rule(url)
-      document.crop_name(url)
-          .then(() => {
-            return_file_list.forEach(item => {
-              item.show_name = document.crop_name(item.name);
-            });
-            return_file_list = return_file_list.filter(item => item.name !== 'rule.js')
-            if (url.length - url.replaceAll('/', '').length === 3) { //如果有且只有三个'/'，则认为当前处于根目录
-              file_list.value = return_file_list
-            } else {
-              file_list.value = [{'name': '../', 'type': 'directory', 'show_name': '⬅️ 返回上层'}, ...return_file_list]
-            }
-            loading_file_flag.value = false
-          });
+      let crop_name = (input) => (input)
+      if (return_file_list.find(it => it.name==='rule.js')) {
+        crop_name = await get_rename_rule(url)
+      }
+      console.log(crop_name)
+      return_file_list.forEach(item => {
+        item.show_name = crop_name(item.name);
+      });
+      return_file_list = return_file_list.filter(item => item.name !== 'rule.js')
+      if (url.length - url.replaceAll('/', '').length === 3) { //如果有且只有三个'/'，则认为当前处于根目录
+        file_list.value = return_file_list
+      } else {
+        file_list.value = [{'name': '../', 'type': 'directory', 'show_name': '⬅️ 返回上层'}, ...return_file_list]
+      }
+      loading_file_flag.value = false
+
     }).catch(err => {
       console.error(err);
       // 处理错误
@@ -72,7 +87,7 @@ const choose_menu = (index, show_name, url, type) => {
     if (reformed_url.endsWith('/')) reformed_url = reformed_url.slice(0, -1)  // 历史遗留问题，确保文件结尾没有/
     formState.root_link = reformed_url
     let directory_url = reformed_url.slice(0, reformed_url.lastIndexOf("/") + 1)  // 目录的结尾必须是/
-    if (file_list.value.length === 0) {  // 从地址栏进入时播放列表未知，补充获取播放列表
+    if (file_list.value.length === 1) {  // 从地址栏进入时播放列表未知，补充获取播放列表
       get_directory_detail(directory_url)
     }
 
@@ -81,6 +96,7 @@ const choose_menu = (index, show_name, url, type) => {
       "play_list": file_list,
       "video_index": index
     }
+    selectedKeys.value = [index]
     emit('choose_menu', choose_menu_result)
     return
   }
@@ -88,6 +104,7 @@ const choose_menu = (index, show_name, url, type) => {
   // 目录情况
   formState.root_link = reformed_url
   get_directory_detail(reformed_url)
+  selectedKeys.value = [index]
 };
 
 
@@ -121,11 +138,11 @@ const concat_dir = (path, name, type) => {
       <a-form-item style="padding-left: 6px;padding-top: 10px;padding-bottom: 4px">
         <a-input v-model:value="formState.root_link" placeholder="请输入地址" style="width: 200px;margin-right: 4px;"/>
         <a-button
-            type="primary"
-            html-type="submit"
-            :disabled="formState.root_link === ''||!formState.root_link.endsWith('/')"
-            @click="choose_menu(0, 'root', formState.root_link, '')"
-            style="color: #f2f2f2"
+          type="primary"
+          html-type="submit"
+          :disabled="formState.root_link === ''||!formState.root_link.endsWith('/')"
+          @click="choose_menu(0, 'root', formState.root_link, '')"
+          style="color: #f2f2f2"
         >
           确认
         </a-button>

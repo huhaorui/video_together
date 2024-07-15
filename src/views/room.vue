@@ -6,7 +6,7 @@
 </template>
 
 <script setup>
-import {ref, onMounted, watch, toRefs, defineProps, toRaw, reactive} from 'vue';
+import {ref, onMounted, watch, toRefs, defineProps, toRaw, reactive, defineEmits} from 'vue';
 import axios from 'axios';
 import {useRoute} from 'vue-router';
 
@@ -33,8 +33,10 @@ watch(choose_video_obj, (newValue) => {
   play_list.value = newValue.play_list;
 });
 
+const emit = defineEmits(['return_index'])
 const onVideoEnded = () => {
   index.value++;
+  emit('return_index', index)
   const currentItem = play_list.value[index.value];
   video.value.src = video_url.value.substring(0, video_url.value.lastIndexOf('/')) + '/' + currentItem.name;
   document.title = decodeURI(currentItem.show_name);
