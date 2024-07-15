@@ -1,5 +1,5 @@
 <script setup>
-import {reactive, ref, defineEmits, onMounted, watch} from "vue";
+import {reactive, ref, defineEmits, onMounted, watch, toRefs, toRaw} from "vue";
 import axios from "axios";
 import {useRoute} from "vue-router";
 
@@ -7,13 +7,25 @@ const formState = reactive({
   root_link: '',
 });
 
+const props = defineProps({
+  curr_index: {
+    type: Number,
+  },
+})
+const {curr_index} = toRefs(props)
+
 let file_list = ref([{}]);
 let source_url = ref('')
 let file_name = ref('')
 let index = ref(0)
-let selectedKeys = ref([1])
+let selectedKeys = ref([])
 let collapsed = ref(false)
 let loading_file_flag = ref(true)
+
+watch(curr_index, (newValue) => {
+  newValue = toRaw(newValue);
+  selectedKeys.value = [newValue.value];
+});
 
 const rename_file_by_rule = (directory_url) => {
   return axios.get(directory_url + 'rule.js')
@@ -83,6 +95,7 @@ const choose_menu = (index, show_name, url, type) => {
       "play_list": file_list,
       "video_index": index
     }
+    selectedKeys.value = [index]
     emit('choose_menu', choose_menu_result)
     return
   }
@@ -90,6 +103,7 @@ const choose_menu = (index, show_name, url, type) => {
   // 目录情况
   formState.root_link = reformed_url
   get_directory_detail(reformed_url)
+  selectedKeys.value = [index]
 };
 
 
