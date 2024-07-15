@@ -30,6 +30,7 @@ const rename_file_by_rule = (directory_url) => {
 const get_directory_detail = (url) => {
   file_list.value = []
   loading_file_flag.value = true
+  url = url.substring(0, url.lastIndexOf('/') + 1)
   if (url.endsWith('/')) {
     axios.get(url).then(res => {
       let return_file_list = res.data;
