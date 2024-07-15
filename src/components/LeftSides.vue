@@ -85,7 +85,6 @@ const choose_menu = (index, show_name, url, type) => {
     if (reformed_url.endsWith('/')) reformed_url = reformed_url.slice(0, -1)  // 历史遗留问题，确保文件结尾没有/
     formState.root_link = reformed_url
     let directory_url = reformed_url.slice(0, reformed_url.lastIndexOf("/") + 1)  // 目录的结尾必须是/
-      console.log(file_list.value[0])
     if (file_list.value.length === 1) {  // 从地址栏进入时播放列表未知，补充获取播放列表
       get_directory_detail(directory_url)
     }
