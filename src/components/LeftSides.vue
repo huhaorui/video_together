@@ -46,7 +46,10 @@ const get_directory_detail = (url) => {
   if (url.endsWith('/')) {
     axios.get(url).then(async res => {
       let return_file_list = res.data;
-      const crop_name = await get_rename_rule(url)
+      let crop_name = (input) => (input)
+      if (return_file_list.find(it => it.name==='rule.js')) {
+        crop_name = await get_rename_rule(url)
+      }
       console.log(crop_name)
       return_file_list.forEach(item => {
         item.show_name = crop_name(item.name);
