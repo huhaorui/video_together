@@ -6,12 +6,13 @@ const {exec} = require('child_process');
 app.use(express.json())
 
 
-
 app.post("/", (req, res) => {
     console.log(req.body.ref)
     if (req.body.ref.indexOf('master') >= 0) {
         console.log('触发WebHook')
-        exec('bash /www/wwwroot/together.huhaorui.com/video_together/build.sh', (error, stdout, stderr) => {
+        exec('bash /www/wwwroot/together.huhaorui.com/video_together/build.sh', {
+            maxBuffer: 5 * 1024 * 1024,
+        }, (error, stdout, stderr) => {
             if (error) {
                 console.error(`exec error: ${error}`);
                 return;
@@ -23,5 +24,4 @@ app.post("/", (req, res) => {
     res.json('ok')
 });
 
-http.createServer(app).listen(7797, "::0");
-
+http.createServer(app).listen(7796, "::0");
