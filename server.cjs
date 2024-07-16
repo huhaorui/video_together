@@ -2,7 +2,7 @@ const express = require('express');
 const mysql = require('mysql2');
 const app = express();
 const http = require('http');
-const { generateShortUrl, storeUrlMapping, getLongUrl } = require('./short_url_service.cjs');
+const {generateShortUrl, storeUrlMapping, getLongUrl} = require('./short_url_service.cjs');
 
 app.use(express.static('dist'));
 app.use(express.json())
@@ -21,33 +21,24 @@ app.post("/receive", (req, res) => {
 
 
 // 缩短URL的API
-app.post('/share/shorten', (req, res) => {
+app.post('/share/shorten', async (req, res) => {
     const longUrl = req.body["longUrl"];
     console.log(longUrl)
-    generateShortUrl(longUrl, (err, shortUrl) => {
-        if (err) {
-            res.status(500).json({error: err});
-            return;
-        }
-        res.json({shortUrl});
-    });
+    const shortUrl = await generateShortUrl(longUrl);
+    res.json({shortUrl});
 });
 
 // 还原URL的API
-app.get('/share/toLongUrl', (req, res) => {
-    const shortUrl = req.params.shortUrl;
-    getLongUrl(shortUrl, (err, longUrl) => {
-        if (err) {
-            res.status(500).json({ error: 'Internal server error' });
-            return;
-        }
-        if (longUrl) {
-            res.redirect(longUrl);
-        } else {
-            res.status(404).json({ error: 'URL not found' });
-        }
-    });
+app.get('/share/toLongUrl', async (req, res) => {
+    const shortUrl = 'vjMi37VN' //TODO 替换为 req.params.shortUrl;
+    console.log(shortUrl)
+    const longUrl = await getLongUrl(shortUrl);
+    if (longUrl) {
+        res.redirect(longUrl);
+    } else {
+        res.status(404).json({error: 'URL not found'});
+    }
 });
 
-http.createServer(app).listen(7799,"::0");
+http.createServer(app).listen(7799, "::0");
 
