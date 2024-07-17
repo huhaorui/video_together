@@ -30,7 +30,7 @@ app.post('/share/shorten', async (req, res) => {
 
 // 还原URL的API
 app.get('/share/toLongUrl', async (req, res) => {
-    const shortUrl = 'vjMi37VN' //TODO 替换为 req.params.shortUrl;
+    const shortUrl = req.query.shortUrl;
     console.log(shortUrl)
     const longUrl = await getLongUrl(shortUrl);
     if (longUrl) {
