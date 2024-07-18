@@ -4,8 +4,10 @@ const app = express();
 const http = require('http');
 const {generateShortUrl, storeUrlMapping, getLongUrl} = require('./short_url_service.cjs');
 
+require('express-async-errors');
 app.use(express.static('dist'));
 app.use(express.json())
+
 
 let map = new Map()
 
@@ -40,5 +42,21 @@ app.get('/share/toLongUrl', async (req, res) => {
     }
 });
 
+app.get('/share/:shortUrl', async (req, res) => {
+    const shortUrl = req.params.shortUrl;
+    console.log(shortUrl)
+    const longUrl = await getLongUrl(shortUrl);
+    if (longUrl) {
+        res.redirect(longUrl);
+    } else {
+        res.status(404).json({error: 'URL not found'});
+    }
+});
+
+app.use((err, req, res, next) => {
+    res.status(403);
+    res.json({error: err.message});
+
+})
 http.createServer(app).listen(7799, "::0");
 

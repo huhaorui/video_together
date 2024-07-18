@@ -1,9 +1,13 @@
 <template>
   <a-layout style="min-height: 100vh">
     <LeftSides @choose_menu="return_url" :curr_index="curr_index"/>
-
+    <a-float-button style="width: 64px;height: 64px" type="primary" @click="copy_share_link()">
+      <template #icon>
+        <ShareAltOutlined/>
+      </template>
+    </a-float-button>
     <a-layout>
-      <a-layout-header style="background: #fff; padding: 0" />
+      <a-layout-header style="background: #fff; padding: 0"/>
       <a-layout-content style="margin: 0 16px">
 
         <div :style="{ padding: '24px', background: '#fff', minHeight: '360px' }">
@@ -21,9 +25,13 @@
 </template>
 
 <script setup>
-import {reactive, ref} from "vue";
+import {ref} from "vue";
 import room from "./views/room.vue";
 import LeftSides from "@/components/LeftSides.vue";
+import {ShareAltOutlined} from '@ant-design/icons-vue';
+import axios from "axios";
+
+
 let choose_video_obj = ref({})
 let curr_index = ref()
 
@@ -32,6 +40,33 @@ const return_url = (obj) => {
 }
 const update_index = (index) => {
   curr_index.value = index
+}
+const copy_share_link = () => {
+  console.log(choose_video_obj)
+  let video_url = choose_video_obj.value.video_url
+  if (video_url === undefined) {
+    return
+  }
+  let path = video_url.substring(0, video_url.lastIndexOf('/') + 1)
+  let filename = video_url.substring(video_url.lastIndexOf('/') + 1)
+  let index = choose_video_obj.value.video_index
+  let url = '/?'
+  if (path) {
+    url = `${url}source_url=${path}`
+  }
+  if (filename) {
+    url = `${url}&file_name=${filename}`
+  }
+  if (index) {
+    url = `${url}&id=${index}`
+  }
+  axios.post('/share/shorten', {
+    'longUrl': url
+  }).then((res) => {
+    navigator.clipboard.writeText(`${window.location.origin}/share/${res.data.shortUrl}`)
+    console.log()
+  });
+  console.log(url)
 }
 </script>
 
@@ -49,6 +84,7 @@ const update_index = (index) => {
 .site-layout .site-layout-background {
   background: #fff;
 }
+
 [data-theme="dark"] .site-layout .site-layout-background {
   background: #141414;
 }
