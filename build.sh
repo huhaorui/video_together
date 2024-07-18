@@ -1,6 +1,8 @@
 #!/bin/bash
 cd /www/wwwroot/together.huhaorui.com/video_together/
+git checkout master
 git pull
+nvm use 20
 npm install
 npm run build
 rm *.zip
