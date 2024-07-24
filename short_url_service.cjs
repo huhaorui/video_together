@@ -4,25 +4,38 @@ const crypto = require('crypto');
 const base64url = require('base64url');
 const app = express();
 const http = require('http');
+const bluebird = require('bluebird');
 
 
 // MySQL 数据库连接配置
-const connection = mysql.createConnection({
-    host: 'huhaorui.com',
-    user: 'short_link',
-    password: 'PbaGf73bdbnBE2sS',
-    database: 'short_link'
-});
-connection.connect(err => {
-    if (err) {
-        console.error('Error connecting to MySQL:', err);
-        return;
+let mysqlConnection = null;
+const getMysqlConnection = async () => {
+    // Check to see if connection exists and is not in the "closing" state
+    if (!mysqlConnection || mysqlConnection?.connection?._closing) {
+        mysqlConnection = await createNewMysqlConnection();
     }
-    console.log('Connected to MySQL');
-});
+    return mysqlConnection;
+}
 
-function getConnection() {
-    return connection.promise()
+const createNewMysqlConnection = async () => {
+    const connection = await mysql.createConnection({
+        host: 'huhaorui.com',
+        database: 'short_link',
+        user: 'short_link',
+        password:'PbaGf73bdbnBE2sS',
+        Promise: bluebird,
+    });
+
+    // You can do something here to handle the connection
+    // being closed when it occurs.
+    connection.connection.stream.on('close', () => {
+        console.log("MySQL connection closed");
+    });
+    return connection;
+}
+
+async function getConnection() {
+    return await getMysqlConnection();
 }
 
 // 生成短链接的函数
