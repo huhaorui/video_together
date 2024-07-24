@@ -35,7 +35,7 @@ const get_rename_rule = (directory_url) => {
     })
     .catch(() => {
       console.log(directory_url + 'rule.js不存在或加载失败');
-      return (input) => (input)
+      return (input) => (input.replaceAll('.mp4', ''))
     });
 };
 
@@ -46,8 +46,8 @@ const get_directory_detail = (url) => {
   if (url.endsWith('/')) {
     axios.get(url).then(async res => {
       let return_file_list = res.data;
-      let crop_name = (input) => (input)
-      if (return_file_list.find(it => it.name==='rule.js')) {
+      let crop_name = (input) => (input.replaceAll('.mp4', ''))
+      if (return_file_list.find(it => it.name === 'rule.js')) {
         crop_name = await get_rename_rule(url)
       }
       console.log(crop_name)
