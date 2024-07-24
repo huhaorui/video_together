@@ -1,6 +1,7 @@
 #!/bin/zsh
 source ~/.zshrc
 cd /www/wwwroot/together.huhaorui.com/video_together/
+git checkout .
 git checkout master
 git pull
 nvm use 20
