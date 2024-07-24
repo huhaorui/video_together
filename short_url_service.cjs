@@ -1,41 +1,26 @@
 const express = require('express');
 const mysql = require('mysql2');
-const crypto = require('crypto');
-const base64url = require('base64url');
-const app = express();
-const http = require('http');
-const bluebird = require('bluebird');
-
+require('dotenv').config('./env')
+const { DB_HOST, DB_NAME, DB_USER, DB_PWD } = process.env
 
 // MySQL 数据库连接配置
 let mysqlConnection = null;
+
 const getMysqlConnection = async () => {
     // Check to see if connection exists and is not in the "closing" state
     if (!mysqlConnection || mysqlConnection?.connection?._closing) {
         mysqlConnection = await createNewMysqlConnection();
     }
-    return mysqlConnection;
+    return mysqlConnection.promise();
 }
 
 const createNewMysqlConnection = async () => {
-    const connection = await mysql.createConnection({
-        host: 'huhaorui.com',
-        database: 'short_link',
-        user: 'short_link',
-        password:'PbaGf73bdbnBE2sS',
-        Promise: bluebird,
+    return mysql.createConnection({
+        host: DB_HOST,
+        database: DB_NAME,
+        user: DB_USER,
+        password: DB_PWD,
     });
-
-    // You can do something here to handle the connection
-    // being closed when it occurs.
-    connection.connection.stream.on('close', () => {
-        console.log("MySQL connection closed");
-    });
-    return connection;
-}
-
-async function getConnection() {
-    return await getMysqlConnection();
 }
 
 // 生成短链接的函数
@@ -59,13 +44,16 @@ async function generateShortUrl(longUrl) {
 // 存储长链接和短链接的映射
 async function storeUrlMapping(longUrl, shortUrl) {
     const query = 'INSERT INTO url_mapping (long_url, short_url) VALUES (?, ?) ON DUPLICATE KEY UPDATE short_url=VALUES(short_url)';
-    await getConnection().execute(query, [longUrl, shortUrl])
+    const conn = await getMysqlConnection()
+    await conn.execute(query, [longUrl, shortUrl])
 }
 
 // 通过短链接获取长链接
 async function getLongUrl(shortUrl) {
     const query = 'SELECT long_url FROM url_mapping WHERE short_url = ?';
-    const [results, fields] = await getConnection().execute(query, [shortUrl])
+    const conn = await getMysqlConnection()
+    const [results, fields] = await conn.execute(query, [shortUrl])
+
     if (results.length > 0) {
         return results[0].long_url
     } else {
@@ -76,7 +64,8 @@ async function getLongUrl(shortUrl) {
 // 是否存在指定shortUrl
 async function checkShortUrlExists(shortUrl) {
     const query = 'SELECT short_url FROM url_mapping WHERE short_url = ?';
-    const [results, fields] = await getConnection().execute(query, [shortUrl])
+    const conn = await getMysqlConnection()
+    const [results, fields] = await conn.execute(query, [shortUrl])
     return results.length > 0
 }
 

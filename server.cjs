@@ -1,5 +1,4 @@
 const express = require('express');
-const mysql = require('mysql2');
 const app = express();
 const http = require('http');
 const {generateShortUrl, storeUrlMapping, getLongUrl} = require('./short_url_service.cjs');
