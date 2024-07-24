@@ -1,7 +1,6 @@
-const express = require('express');
 const mysql = require('mysql2');
 require('dotenv').config('./env')
-const { DB_HOST, DB_NAME, DB_USER, DB_PWD } = process.env
+const {DB_HOST, DB_NAME, DB_USER, DB_PWD} = process.env
 
 // MySQL 数据库连接配置
 let mysqlConnection = null;
@@ -12,6 +11,12 @@ const getMysqlConnection = async () => {
         mysqlConnection = await createNewMysqlConnection();
     }
     return mysqlConnection.promise();
+}
+
+const executeSQL = async (sql, params) => {
+    const conn = await getMysqlConnection()
+    const [results, fields] = await conn.execute(sql, params)
+    return [results, fields]
 }
 
 const createNewMysqlConnection = async () => {
@@ -44,15 +49,13 @@ async function generateShortUrl(longUrl) {
 // 存储长链接和短链接的映射
 async function storeUrlMapping(longUrl, shortUrl) {
     const query = 'INSERT INTO url_mapping (long_url, short_url) VALUES (?, ?) ON DUPLICATE KEY UPDATE short_url=VALUES(short_url)';
-    const conn = await getMysqlConnection()
-    await conn.execute(query, [longUrl, shortUrl])
+    await executeSQL(query, [longUrl, shortUrl])
 }
 
 // 通过短链接获取长链接
 async function getLongUrl(shortUrl) {
     const query = 'SELECT long_url FROM url_mapping WHERE short_url = ?';
-    const conn = await getMysqlConnection()
-    const [results, fields] = await conn.execute(query, [shortUrl])
+    const [results, fields] = await executeSQL(query, [shortUrl])
 
     if (results.length > 0) {
         return results[0].long_url
@@ -64,8 +67,7 @@ async function getLongUrl(shortUrl) {
 // 是否存在指定shortUrl
 async function checkShortUrlExists(shortUrl) {
     const query = 'SELECT short_url FROM url_mapping WHERE short_url = ?';
-    const conn = await getMysqlConnection()
-    const [results, fields] = await conn.execute(query, [shortUrl])
+    const [results, fields] = await executeSQL(query, [shortUrl])
     return results.length > 0
 }
 

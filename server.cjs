@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const http = require('http');
-const {generateShortUrl, storeUrlMapping, getLongUrl} = require('./short_url_service.cjs');
+const {generateShortUrl, getLongUrl} = require('./short_url_service.cjs');
 
 require('express-async-errors');
 app.use(express.static('dist'));
