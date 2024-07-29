@@ -11,4 +11,4 @@ rm *.zip
 zip -r files node_modules dist server.cjs short_url_service.cjs .env
 docker stop `docker ps -a | grep video_together| cut -c 1-12`
 docker build -t 'video_together' .
-docker run -p 7799:7799 video_together --restart=always &
+docker run --name video_together --restart=always -p 7799:7799 video_together &
