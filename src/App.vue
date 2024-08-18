@@ -30,6 +30,8 @@ import room from "./views/room.vue";
 import LeftSides from "@/components/LeftSides.vue";
 import {ShareAltOutlined} from '@ant-design/icons-vue';
 import axios from "axios";
+import { message } from 'ant-design-vue';
+
 
 
 let choose_video_obj = ref({})
@@ -58,12 +60,13 @@ const copy_share_link = () => {
     url = `${url}&file_name=${filename}`
   }
   if (index) {
-    url = `${url}&id=${index}`
+    url = `${url}&index=${index}`
   }
   axios.post('/share/shorten', {
     'longUrl': url
   }).then((res) => {
     navigator.clipboard.writeText(`${window.location.origin}/share/${res.data.shortUrl}`)
+    message.info('This is a normal message');
     console.log()
   });
   console.log(url)
