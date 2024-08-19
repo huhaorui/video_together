@@ -1,8 +1,8 @@
 <template>
-  <div style="max-width: 100%;height: auto;display: block">
-    <video ref="video" :src="video_url" id="movie" autoplay controls
-           style="margin: auto;max-width: 90%;display: block"></video>
-  </div>
+<div style="max-width: 100%;height: auto;display: block">
+  <video ref="video" :src="video_url" id="movie" autoplay controls
+         style="margin: auto;max-width: 90%;display: block"></video>
+</div>
 </template>
 
 <script setup>
@@ -58,6 +58,9 @@ const onVideoSeeked = () => {
 };
 
 const onVideoPlay = () => {
+  if (video.value.currentTime < 5) {
+    return
+  }
   pauseing_update.value = true;
   axios.post('/send', {
     movie: id.value === '' ? video.value.src : id.value,
