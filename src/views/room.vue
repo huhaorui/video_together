@@ -76,6 +76,7 @@ const sync = () => {
     axios.post("/receive", {movie: id.value === '' ? video.value.src : id.value}).then(res => {
       let me_start_time = new Date().getTime() / 1000 - video.value.currentTime
       let remote_start_time = res.data.seek_time / 1000 - res.data.video_time
+      console.log(me_start_time, remote_start_time, me_start_time - remote_start_time)
       if (!pauseing_update.value && !video.value.paused) {
         if (Math.abs(me_start_time - remote_start_time) > 5) {
           pauseing_update.value = true
