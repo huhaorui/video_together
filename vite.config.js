@@ -28,7 +28,7 @@ export default defineConfig({
                 changeOrigin: true
             },
             '/nas': {
-                target: 'https://frp.huhaorui.com:8350/',
+                target: 'https://nas.huhaorui.com:8103/',
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/nas/, '')
             }
