@@ -30,7 +30,7 @@ const showDrawer = () => {
 		@after-open-change="afterOpenChange"
 	>
 		<div v-for="(items, path) in playHistory" :key="path">
-			<a-typography-title :level="4">{{ decodeURIComponent(path) }}</a-typography-title>
+			<a-typography-title :level="5">{{ decodeURIComponent(path) }}</a-typography-title>
 			<a-typography-text v-for="(item, index) in items" :key="index" :href="item.url" style="display: block;text-decoration: none;outline: none;color: black">
 				<a :href="item.url" > {{ decodeURIComponent(item.name) }} </a>
 			</a-typography-text>

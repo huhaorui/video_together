@@ -49,6 +49,7 @@ const get_directory_detail = (url) => {
       let crop_name = (input) => (input)
       if (return_file_list.find(it => it.name==='rule.js')) {
         crop_name = await get_rename_rule(url)
+        document.crop_name=crop_name
       }
       console.log(crop_name)
       return_file_list.forEach(item => {
