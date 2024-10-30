@@ -12,11 +12,13 @@ let map = new Map()
 
 app.post("/send", (req, res) => {
     map.set(req.body.movie, req.body)
+    console.log("send",map)
     res.json("OK")
 });
 
 
 app.post("/receive", (req, res) => {
+    console.log("receive",map)
     res.json(map.get(req.body.movie))
 });
 

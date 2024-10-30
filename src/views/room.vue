@@ -1,19 +1,19 @@
 <template>
 <div style="max-width: 100%;height: auto;display: block">
-  <video ref="video" :src="video_url" id="movie" autoplay controls
-         style="margin: auto;max-width: 90%;display: block"></video>
+    <video ref="video" :src="video_url" id="movie" autoplay controls
+           style="margin: auto;max-width: 90%;display: block"></video>
 </div>
 </template>
 
 <script setup>
-import {ref, onMounted, watch, toRefs, defineProps, toRaw, reactive, defineEmits} from 'vue';
+import {defineEmits, defineProps, onMounted, reactive, ref, toRaw, toRefs, watch} from 'vue';
 import axios from 'axios';
 import {useRoute} from 'vue-router';
 
 const props = defineProps({
-  choose_video_obj: {
-    type: Object,
-  },
+    choose_video_obj: {
+        type: Object,
+    },
 });
 
 const {choose_video_obj} = toRefs(props);
@@ -27,49 +27,85 @@ const formState = ref({});
 const nosync = ref(undefined)
 
 watch(choose_video_obj, (newValue) => {
-  newValue = toRaw(newValue);
-  index.value = newValue.video_index;
-  video_url.value = newValue.video_url;
-  play_list.value = newValue.play_list;
+    newValue = toRaw(newValue);
+    index.value = newValue.video_index;
+    video_url.value = newValue.video_url;
+    play_list.value = newValue.play_list;
 });
 
 const emit = defineEmits(['return_index'])
 const onVideoEnded = () => {
-  index.value++;
-  emit('return_index', index)
-  const currentItem = play_list.value[index.value];
-  video.value.src = video_url.value.substring(0, video_url.value.lastIndexOf('/')) + '/' + currentItem.name;
-  document.title = decodeURI(currentItem.show_name);
-  pauseing_update.value = true;
-  setTimeout(() => {
-    pauseing_update.value = false;
-  }, 3000);
+    index.value++;
+    emit('return_index', index)
+    const currentItem = play_list.value[index.value];
+    video.value.src = video_url.value.substring(0, video_url.value.lastIndexOf('/')) + '/' + currentItem.name;
+    document.title = decodeURI(currentItem.show_name);
+    pauseing_update.value = true;
+    setTimeout(() => {
+        pauseing_update.value = false;
+    }, 3000);
 };
 
 const onVideoSeeked = () => {
-  pauseing_update.value = true;
-  axios.post('/send', {
-    movie: id.value === '' ? video.value.src : id.value,
-    video_time: video.value.currentTime,
-    seek_time: new Date().getTime(),
-  }).then(() => {
-    pauseing_update.value = false;
-  });
+    pauseing_update.value = true;
+    axios.post('/send', {
+        movie: id.value === '' ? video.value.src : id.value,
+        video_time: video.value.currentTime,
+        seek_time: new Date().getTime(),
+    }).then(() => {
+        pauseing_update.value = false;
+    });
 };
 
 const onVideoPlay = () => {
-  if (video.value.currentTime < 5) {
-    return
-  }
-  pauseing_update.value = true;
-  axios.post('/send', {
-    movie: id.value === '' ? video.value.src : id.value,
-    video_time: video.value.currentTime,
-    seek_time: new Date().getTime(),
-  }).then(() => {
-    pauseing_update.value = false;
-  });
+    pauseing_update.value = true;
+    axios.post('/send', {
+        movie: id.value === '' ? video.value.src : id.value,
+        video_time: video.value.currentTime,
+        seek_time: new Date().getTime(),
+    }).then(() => {
+        pauseing_update.value = false;
+        
+        // TODO 记录播放记录到localStorage
+        playHistory(video.value.src)
+        
+    });
 };
+
+const playHistory = (videoUrl) => {
+    const urlParts = videoUrl.split('/');
+    const videoName = document.crop_name(decodeURIComponent(urlParts.pop()));
+    const dir = urlParts.join('/').replace(new URL(videoUrl).origin, '')
+    
+    
+    let playHistory = localStorage.getItem('playHistory');
+    if (playHistory) {
+        playHistory = JSON.parse(playHistory);
+    } else {
+        playHistory = {}
+    }
+    // 加入此播放记录，并维持最近播放的五个项目  TODO 用clip后的名字
+    const dirData = playHistory[dir];
+    if (dirData) {
+        if (dirData.every(item => item.name !== decodeURIComponent(videoName))) {  // 查重
+            dirData.push({
+                "name": videoName,
+                "url": "?source_url=" + decodeURIComponent(urlParts.join('/')) + "/&file_name=" + decodeURIComponent(videoName)
+            });
+            dirData.length > 5 && dirData.shift();
+        }
+    } else {
+        playHistory[dir] = [{
+            "name": decodeURIComponent(videoName),
+            "url": "?source_url=" + decodeURIComponent(urlParts.join('/')) + "/&file_name=" + decodeURIComponent(videoName)
+        }]
+    }
+    
+    // 存储
+    localStorage.setItem('playHistory', JSON.stringify(playHistory));
+    console.log(playHistory)
+    
+}
 
 const sync = () => {
   if (!pauseing_update.value && nosync.value === undefined) {
@@ -92,23 +128,23 @@ const sync = () => {
 
 
 onMounted(() => {
-  video.value = document.getElementById('movie');
-  video.value.onseeked = onVideoSeeked;
-  video.value.onended = onVideoEnded;
-  video.value.onplay = onVideoPlay;
-  setInterval(() => {
-    sync()
-  }, 1000)
-  const route = useRoute();
-  watch(() => route.query, (query) => {
-    video_url.value = query.url;
-    video.value.src = video_url.value;
-    formState.value.root_link = query.dir;
-    nosync.value = query.nosync
-    if (query.id) {
-      id.value = query.id;
-    }
-  })
+    video.value = document.getElementById('movie');
+    video.value.onseeked = onVideoSeeked;
+    video.value.onended = onVideoEnded;
+    video.value.onplay = onVideoPlay;
+    setInterval(() => {
+        sync()
+    }, 1000)
+    const route = useRoute();
+    watch(() => route.query, (query) => {
+        video_url.value = query.url;
+        video.value.src = video_url.value;
+        formState.value.root_link = query.dir;
+        nosync.value = query.nosync
+        if (query.id) {
+            id.value = query.id;
+        }
+    })
 });
 </script>
 
