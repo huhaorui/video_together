@@ -76,9 +76,8 @@ const playHistory = (videoUrl) => {
 	// console.log(videoUrl)  // http://localhost:5173/nas/%E5%93%86%E5%95%A6A%E6%A2%A6/2019%E5%B9%B4/548%E8%AF%9D%20%E7%A5%9E%E7%81%AF%E7%9A%84%E7%83%9F%E6%80%AA%20and%20%E8%83%96%E8%99%8E%E7%9A%84%E7%82%96%E8%8F%9C.mp4
 	// 读取播放记录
 	var urlParts = videoUrl.split('/');
-	var videoName = urlParts.pop();
+	var videoName = decodeURIComponent(urlParts.pop());
 	var dir = urlParts.join('/');
-	console.log(decodeURIComponent(videoName))
 
 	let playHistory = localStorage.getItem('playHistory');
 	if (playHistory) {
@@ -86,13 +85,17 @@ const playHistory = (videoUrl) => {
 	} else {
 		playHistory = {}
 	}
-	// 加入此播放记录，并维持最近播放的五个项目
+	// 加入此播放记录，并维持最近播放的五个项目  TODO 用clip后的名字
 	var dirData = playHistory[dir]
+	window.dirData=dirData
+	window.name=decodeURIComponent(videoName)
 	if (dirData) {
-		dirData.push({"name": videoName, "url": videoUrl});
-		dirData.length > 5 && dirData.shift();
+		if (dirData.every(item => item.name !== decodeURIComponent(videoName))) {  // 查重
+			dirData.push({"name": videoName, "url": "?source_url=" + decodeURIComponent(dir) + "/&file_name=" + decodeURIComponent(videoName)});
+			dirData.length > 5 && dirData.shift();
+		}
 	} else {
-		playHistory[dir] = [{"name": decodeURIComponent(videoName), "url": "/nas/?source_url=" + decodeURIComponent(dir) + "/&file_name=" + decodeURIComponent(videoName)}]
+		playHistory[dir] = [{"name": decodeURIComponent(videoName), "url": "?source_url=" + decodeURIComponent(dir) + "/&file_name=" + decodeURIComponent(videoName)}]
 	}
 
 	// 存储
