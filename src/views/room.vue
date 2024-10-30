@@ -74,7 +74,8 @@ const onVideoPlay = () => {
 
 const playHistory = (videoUrl) => {
     const urlParts = videoUrl.split('/');
-    const videoName = document.crop_name(decodeURIComponent(urlParts.pop()));
+    const videoName = decodeURIComponent(urlParts.pop())
+    const videoName_crop = document.crop_name(videoName);
     const dir = urlParts.join('/').replace(new URL(videoUrl).origin, '')
     
     
@@ -87,16 +88,16 @@ const playHistory = (videoUrl) => {
     // 加入此播放记录，并维持最近播放的五个项目  TODO 用clip后的名字
     const dirData = playHistory[dir];
     if (dirData) {
-        if (dirData.every(item => item.name !== decodeURIComponent(videoName))) {  // 查重
+        if (dirData.every(item => item.name !== decodeURIComponent(videoName_crop))) {  // 查重
             dirData.push({
-                "name": videoName,
+                "name": videoName_crop,
                 "url": "?source_url=" + decodeURIComponent(urlParts.join('/')) + "/&file_name=" + decodeURIComponent(videoName)
             });
             dirData.length > 5 && dirData.shift();
         }
     } else {
         playHistory[dir] = [{
-            "name": decodeURIComponent(videoName),
+            "name": decodeURIComponent(videoName_crop),
             "url": "?source_url=" + decodeURIComponent(urlParts.join('/')) + "/&file_name=" + decodeURIComponent(videoName)
         }]
     }
@@ -108,22 +109,22 @@ const playHistory = (videoUrl) => {
 }
 
 const sync = () => {
-  if (!pauseing_update.value && nosync.value === undefined) {
-    axios.post("/receive", {movie: id.value === '' ? video.value.src : id.value}).then(res => {
-      let me_start_time = new Date().getTime() / 1000 - video.value.currentTime
-      let remote_start_time = res.data.seek_time / 1000 - res.data.video_time
-      console.log(me_start_time, remote_start_time, me_start_time - remote_start_time)
-      if (!pauseing_update.value && !video.value.paused) {
-        if (Math.abs(me_start_time - remote_start_time) > 5) {
-          pauseing_update.value = true
-          video.value.currentTime = new Date().getTime() / 1000 - res.data.seek_time / 1000 + res.data.video_time
-          setTimeout(() => {
-            pauseing_update.value = false
-          }, 2000)
-        }
-      }
-    })
-  }
+    if (!pauseing_update.value && nosync.value === undefined) {
+        axios.post("/receive", {movie: id.value === '' ? video.value.src : id.value}).then(res => {
+            let me_start_time = new Date().getTime() / 1000 - video.value.currentTime
+            let remote_start_time = res.data.seek_time / 1000 - res.data.video_time
+            console.log(me_start_time, remote_start_time, me_start_time - remote_start_time)
+            if (!pauseing_update.value && !video.value.paused) {
+                if (Math.abs(me_start_time - remote_start_time) > 5) {
+                    pauseing_update.value = true
+                    video.value.currentTime = new Date().getTime() / 1000 - res.data.seek_time / 1000 + res.data.video_time
+                    setTimeout(() => {
+                        pauseing_update.value = false
+                    }, 2000)
+                }
+            }
+        })
+    }
 }
 
 
